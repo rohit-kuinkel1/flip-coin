@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /**
+     * ========================================================================
+     * LANGUAGE & ENVIRONMENT
+     * ========================================================================
+     * 
+     * Target ES2020 for modern JS features while maintaining broad
+     * compatibility. ES2020 includes optional chaining, nullish coalescing,
+     * BigInt, and Promise.allSettled - all useful for us.
+     * 
+     * The "lib" array specifies which built-in API declarations to include.
+     * We use ES2020 to match our target.
+     * 
+     * Module system is ESNext for maximum flexibility with bundlers.
+     * The "bundler" moduleResolution is optimized for tools like tsup/esbuild.
+     */
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    /**
+     * ========================================================================
+     * OUTPUT CONFIGURATION
+     * ========================================================================
+     * 
+     * - outDir: Compiled output goes to dist/ (handled by tsup, but set here
+     *   for IDE consistency and direct tsc usage)
+     * - declaration: Generate .d.ts type definition files for consumers
+     * - declarationMap: Source maps for .d.ts files (enables "Go to Definition"
+     *   to jump to .ts source instead of .d.ts)
+     * - sourceMap: Generate .js.map files for debugging
+     */
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    /**
+     * ========================================================================
+     * STRICTNESS
+     * ========================================================================
+     * 
+     * Maximum strictness for a physics library where correctness is critical.
+     * 
+     * - strict: Enables all strict type checking options
+     * - noUncheckedIndexedAccess: Array/object index access returns T | undefined
+     *   (prevents bugs like assuming array[0] exists)
+     * - noImplicitOverride: Requires "override" keyword when overriding methods
+     * - noPropertyAccessFromIndexSignature: Forces bracket notation for dynamic
+     *   keys, making code intent clearer
+     */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    /**
+     * ========================================================================
+     * INTEROP & COMPATIBILITY
+     * ========================================================================
+     * 
+     * - esModuleInterop: Enables proper default import of CommonJS modules
+     * - allowSyntheticDefaultImports: Allows "import x from 'y'" even if y
+     *   doesn't have a default export (for type checking only)
+     * - forceConsistentCasingInFileNames: Prevents case-sensitivity bugs
+     *   between Windows (case-insensitive) and Unix (case-sensitive)
+     * - isolatedModules: Ensures each file can be transpiled independently
+     *   (required for esbuild/tsup)
+     * - verbatimModuleSyntax: Preserves import/export syntax as written,
+     *   ensuring type-only imports are properly erased
+     */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /**
+     * ========================================================================
+     * PERFORMANCE
+     * ========================================================================
+     * 
+     * Skip type checking of declaration files in node_modules. These have
+     * already been validated by their publishers. This significantly speeds
+     * up compilation.
+     */
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
