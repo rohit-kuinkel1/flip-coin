@@ -53,6 +53,10 @@
 
 import type { CryptoEntropyResult } from '../types/CryptoEntropyResult';
 import type { CryptoEntropyOptions } from '../types/CryptoEntropyOptions';
+import {
+  EntropySourceUnavailableError,
+  EntropyCollectionTimeoutError,
+} from '../errors';
 
 /**
  * Default configuration values.
@@ -92,7 +96,7 @@ export async function collectCryptoEntropy(
    * to collect entropy from the operating system.
    */
   if (!isCryptoEntropyAvailable()) {
-    throw new Error('Web Crypto API (crypto.getRandomValues) is not available');
+    throw new EntropySourceUnavailableError('crypto', 'crypto.getRandomValues is not available');
   }
 
   /**
@@ -107,7 +111,7 @@ export async function collectCryptoEntropy(
       return buffer;
     },
     timeoutMs,
-    'Crypto entropy collection timed out'
+    new EntropyCollectionTimeoutError('crypto', timeoutMs)
   );
 
   const endTime = performance.now();
@@ -145,17 +149,17 @@ export function isCryptoEntropyAvailable(): boolean {
  *
  * @param fn Async function to execute
  * @param timeoutMs Maximum time to wait
- * @param errorMessage Error message if timeout exceeded
+ * @param error Error to throw if timeout exceeded
  * @returns Promise that resolves with fn's result or rejects on timeout
  */
 function withTimeout<T>(
   fn: () => Promise<T>,
   timeoutMs: number,
-  errorMessage: string
+  error: Error
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
-      reject(new Error(errorMessage));
+      reject(error);
     }, timeoutMs);
 
     fn()
