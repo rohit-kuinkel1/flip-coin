@@ -107,11 +107,11 @@ with crypto + timing sources. Timer jitter alone is the minimum viable fallback.
 
 ## Phase 3: Physics Engine
 
-**Status: NOT STARTED**
+**Status: IN PROGRESS**
 
 3D rigid body dynamics simulation.
 
-- [ ] Rigid body state — `src/physics/rigid-body.ts`
+- [x] Rigid body state — `src/physics/rigid-body.ts`
 - [ ] Force calculations — `src/physics/forces.ts`
 - [ ] RK4 integrator — `src/physics/integrator.ts`
 - [ ] Collision detection — `src/physics/collision.ts`
