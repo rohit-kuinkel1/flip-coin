@@ -17,25 +17,26 @@
  * - macOS: `SecRandomCopyBytes`
  * - Node.js: Uses OpenSSL's CSPRNG
  *
- * ## Entropy Quality: 4/5
+ * ## Internally proclaimed entropy quality: 4/5
  *
- * The OS CSPRNG is considered high quality because:
+ * The OS CSPRNG is proclaimed to be high quality because:
  * 1. It's seeded from multiple hardware entropy sources
  * 2. It's continuously re-seeded during system operation
  * 3. It uses cryptographically secure algorithms (typically ChaCha20 or AES-CTR)
  * 4. It's the same source trusted for TLS key generation
  *
- * We rate it 4/5 (not 5/5) because:
- * - It's ultimately a DRBG (deterministic random bit generator), not true randomness
+ * We proclaim it to be 4/5 (not 5/5) because:
  * - In VMs or containers, entropy pool quality can degrade
- * - Immediately after boot, the pool may not be fully seeded
+ * - It's ultimately a DRBG (deterministic random bit generator), which means it's not true randomness
+ * - Immediately after boot, the pool may not be fully seeded which further degrades quality
  *
- * ## Why Use This Despite Being a PRNG?
+ * ## Why Use This Despite it being proclaimed as a PRNG?
  *
- * While `crypto.getRandomValues()` is technically a PRNG, it's seeded from
+ * While `crypto.getRandomValues()` is internally proclaimed as a PRNG, it's seeded from
  * true entropy sources (hardware RNG, interrupt timing, etc.). The seeding
  * happens continuously and is managed by the OS, making it effectively
  * unpredictable even with source code access.
+ * Read more here: https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
  *
  * We include it as a primary entropy source because:
  * - It's always available (browser and Node.js)
@@ -80,8 +81,16 @@ export async function collectCryptoEntropy(
   const byteCount = options.byteCount ?? DEFAULT_BYTE_COUNT;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
+  //TODO: not sure if we really wanna use performance.now() here,
+  //something better probably is out there thats not an external dep?
   const startTime = performance.now();
 
+  /**
+   * This will probably never be the case, but just in case if
+   * somehow crypto.getRandomValues is not available, then we just
+   * throw an error to signal that something went wrong when trying 
+   * to collect entropy from the operating system.
+   */
   if (!isCryptoEntropyAvailable()) {
     throw new Error('Web Crypto API (crypto.getRandomValues) is not available');
   }

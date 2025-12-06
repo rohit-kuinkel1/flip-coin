@@ -2,6 +2,18 @@
 
 ---
 
+## Misc
+
+Cross-cutting infrastructure and shared utilities.
+
+- [x] Base error class — `src/common/errors/`
+  - `BaseError.ts` — Base class for all custom errors (extends `Error`)
+  - `BaseErrorOptions.ts` — Options interface with `cause` and `context` support
+  - `index.ts` — Barrel export
+  - Domain-specific errors extend `BaseError` and live in their own `errors/` subdirectory (e.g., `src/entropy/errors/` or `src/physics/errors/` etc)
+
+---
+
 ## Phase 0: Project Scaffolding
 
 **Status: COMPLETE**

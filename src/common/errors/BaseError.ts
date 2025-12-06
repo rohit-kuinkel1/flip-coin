@@ -23,21 +23,21 @@ import type { BaseErrorOptions } from "./BaseErrorOptions";
  * }
  * ```
  */
-export class BaseError extends Error {
+export abstract class BaseError extends Error {
     /**
      * Structured context data attached to this error.
      * Contains arbitrary key-value pairs for debugging.
+     * If a `cause` was provided, it's stored here as `context.cause`.
      */
     public readonly context: Record<string, unknown>;
 
-    /**
-     * The underlying error that caused this error, if any.
-     */
-    public readonly cause: unknown;
-
     constructor(message: string, options?: BaseErrorOptions) {
-        const contextStr = options?.context && Object.keys(options.context).length > 0
-            ? ` | Context: ${JSON.stringify(options.context)}`
+        const contextWithCause = options?.cause
+            ? { ...options?.context, cause: options.cause }
+            : options?.context;
+
+        const contextStr = contextWithCause && Object.keys(contextWithCause).length > 0
+            ? ` | Context: ${JSON.stringify(contextWithCause)}`
             : '';
         const fullMessage = `${message}${contextStr}`;
 
@@ -51,10 +51,9 @@ export class BaseError extends Error {
         this.name = this.constructor.name;
 
         /**
-         * Store context and cause as properties for programmatic access
+         * Store context (including cause) as a property for programmatic access
          * if we ever need to access them later on down the line.
          */
-        this.context = options?.context ?? {};
-        this.cause = options?.cause;
+        this.context = contextWithCause ?? {};
     }
 }

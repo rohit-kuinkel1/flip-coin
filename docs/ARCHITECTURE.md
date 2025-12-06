@@ -319,7 +319,11 @@ interface DebugFlipResult extends FlipResult {
 flip-coin/
 ├── src/
 │   ├── index.ts              # Public API exports
+│   ├── common/
+│   │   └── errors/
+│   │       └── BaseError.ts  # Base error class for all custom errors
 │   ├── entropy/
+│   │   ├── errors/           # Entropy-specific error classes
 │   │   ├── pool.ts           # Entropy pool management
 │   │   ├── sources/
 │   │   │   ├── timing.ts     # High-res timer jitter
@@ -328,6 +332,7 @@ flip-coin/
 │   │   │   └── quantum.ts    # External QRNG API
 │   │   └── mixer.ts          # Hash-based mixing
 │   ├── physics/
+│   │   ├── errors/           # Physics-specific error classes
 │   │   ├── rigid-body.ts     # Coin physics state
 │   │   ├── forces.ts         # Gravity, drag calculations
 │   │   ├── collision.ts      # Ground collision handling
@@ -337,10 +342,12 @@ flip-coin/
 │   │       ├── mat3.ts       # 3x3 matrix (inertia tensor)
 │   │       └── quaternion.ts # Rotation representation
 │   ├── simulation/
+│   │   ├── errors/           # Simulation-specific error classes
 │   │   ├── controller.ts     # Main simulation loop
 │   │   ├── initial.ts        # Initial condition generator
 │   │   └── stability.ts      # Rest detection
 │   ├── evaluator/
+│   │   ├── errors/           # Evaluator-specific error classes
 │   │   └── face.ts           # Determine heads/tails/edge
 │   └── visualization/        # Optional Three.js debugger
 │       ├── scene.ts
