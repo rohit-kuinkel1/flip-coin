@@ -85,8 +85,6 @@ export async function collectCryptoEntropy(
   const byteCount = options.byteCount ?? DEFAULT_BYTE_COUNT;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  //TODO: not sure if we really wanna use performance.now() here,
-  //something better probably is out there thats not an external dep?
   const startTime = performance.now();
 
   /**

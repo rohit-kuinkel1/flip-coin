@@ -89,6 +89,7 @@ import type {
   EntropyPoolOptions,
   SourceResult,
 } from './types';
+import { EntropyCollectionFailedError } from './errors';
 
 /**
  * Preset configurations for each entropy level.
@@ -165,11 +166,7 @@ export async function collectEntropy(
        * This should be rare since timer jitter is always available.
        */
       if (allResults.length === 0) {
-        throw new Error(
-          'Entropy collection failed: no sources available after ' +
-          `${config.maxTimeMs}ms. This indicates a critical environment issue ` +
-          'where even timer jitter entropy is unavailable.'
-        );
+        throw new EntropyCollectionFailedError(config.maxTimeMs);
       }
 
       /**

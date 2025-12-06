@@ -49,6 +49,8 @@
  * → H(input || 0) || H(input || 1) || H(input || 2) || ...
  */
 
+import { InsufficientEntropyBufferError } from './errors';
+
 /**
  * Mixes multiple entropy sources into a single buffer using SHA-256.
  *
@@ -208,9 +210,7 @@ export function bytesToFloat(buffer: Uint8Array, offset: number = 0): number {
    * We need 4 bytes to build a 32-bit unsigned integer.
    */
   if (buffer.length < offset + 4) {
-    throw new Error(
-      `bytesToFloat requires at least 4 bytes, got ${buffer.length - offset}`
-    );
+    throw new InsufficientEntropyBufferError(4, buffer.length - offset);
   }
 
   /**
