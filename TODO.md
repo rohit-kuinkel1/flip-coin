@@ -7,10 +7,15 @@
 Cross-cutting infrastructure and shared utilities.
 
 - [x] Base error class — `src/common/errors/`
-  - `BaseError.ts` — Base class for all custom errors (extends `Error`)
+  - `BaseError.ts` — Abstract base class for all custom errors (extends `Error`)
   - `BaseErrorOptions.ts` — Options interface with `cause` and `context` support
   - `index.ts` — Barrel export
-  - Domain-specific errors extend `BaseError` and live in their own `errors/` subdirectory (e.g., `src/entropy/errors/` or `src/physics/errors/` etc)
+  - Domain-specific errors extend `BaseError` and live in their own `errors/` subdirectory
+- [x] Entropy errors — `src/entropy/errors/`
+  - `EntropySourceUnavailableError` — Source not available in environment
+  - `EntropyCollectionTimeoutError` — Individual source timed out
+  - `EntropyCollectionFailedError` — All sources failed after time budget
+  - `InsufficientEntropyBufferError` — Buffer too small for operation
 
 ---
 
@@ -87,11 +92,14 @@ True randomness collection from multiple sources.
 - [x] Mixer (hash-based) — `src/entropy/mixer.ts`
 - [x] Timer jitter source — `src/entropy/sources/timing.ts`
 - [x] Crypto API source — `src/entropy/sources/crypto.ts`
-- [x] Entropy tests — `tests/entropy/*.test.ts`
+- [x] Pool unit tests — `tests/entropy/pool.test.ts`
+- [x] Mixer unit tests — `tests/entropy/mixer.test.ts`
+- [x] Crypto source tests — `tests/entropy/sources/crypto.test.ts`
+- [x] Timing source tests — `tests/entropy/sources/timing.test.ts`
 - [x] Graceful degradation (works with timing-only if crypto unavailable)
 - [x] Per-source timeouts and silent skip on failure
 
-### Optional Entropy Sources (NOT IMPLEMENTED)
+### Optional Entropy Sources (NOT IMPLEMENTED YET BUT THIS WILL DEFINITELY BE IMPLEMENTED)
 The following sources are described in ARCHITECTURE.md but are **not implemented**:
 - [ ] Quantum API source — `src/entropy/sources/quantum.ts`
   - Would require external API (ANU QRNG, random.org)
@@ -103,8 +111,7 @@ The following sources are described in ARCHITECTURE.md but are **not implemented
   - Requires active user interaction
   - DOM event listeners
 
-*These sources are optional enhancements. The core entropy system is fully functional
-with crypto + timing sources. Timer jitter alone is the minimum viable fallback.*
+*These sources are marked as optional enhancements for now. The core entropy system is fully functional with crypto + timing sources. Timer jitter alone is the minimum viable fallback. We will however definitely implement them in the future.*
 
 ### Architectural Notes
 - **Stateless Pool**: The current implementation uses one-shot collection rather than
@@ -124,10 +131,13 @@ with crypto + timing sources. Timer jitter alone is the minimum viable fallback.
 3D rigid body dynamics simulation.
 
 - [x] Rigid body state — `src/physics/rigid-body.ts`
+- [x] Rigid body tests — `tests/physics/rigid-body.test.ts`
 - [ ] Force calculations — `src/physics/forces.ts`
+- [ ] Force calculation tests — `tests/physics/forces.test.ts`
 - [ ] RK4 integrator — `src/physics/integrator.ts`
+- [ ] Integrator tests — `tests/physics/integrator.test.ts`
 - [ ] Collision detection — `src/physics/collision.ts`
-- [ ] Physics tests — `tests/physics/*.test.ts`
+- [ ] Collision tests — `tests/physics/collision.test.ts`
 
 ---
 
@@ -138,8 +148,9 @@ with crypto + timing sources. Timer jitter alone is the minimum viable fallback.
 Determine flip outcome from final coin state.
 
 - [ ] Face determination — `src/evaluator/face.ts`
+- [ ] Face determination tests — `tests/evaluator/face.test.ts`
 - [ ] Stability detection — `src/simulation/stability.ts`
-- [ ] Evaluator tests — `tests/evaluator/*.test.ts`
+- [ ] Stability detection tests — `tests/simulation/stability.test.ts`
 
 ---
 
@@ -150,7 +161,9 @@ Determine flip outcome from final coin state.
 Orchestrate the full flip process.
 
 - [ ] Initial condition generator — `src/simulation/initial.ts`
+- [ ] Initial condition tests — `tests/simulation/initial.test.ts`
 - [ ] Main simulation loop — `src/simulation/controller.ts`
+- [ ] Controller tests — `tests/simulation/controller.test.ts`
 - [ ] Public API exports — `src/index.ts`
 - [ ] Debug API exports — `src/debug.ts`
 - [ ] Type definitions — `src/types/*.ts`
