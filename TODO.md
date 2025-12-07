@@ -120,7 +120,7 @@ The following sources are described in ARCHITECTURE.md but are **not implemented
 - **No Entropy Accumulation Buffer**: Unlike `/dev/random`, we don't track accumulated
   bits across calls. Each `collectEntropy()` call is independent.
 
-**Current Total: 172 tests passing, 3 skipped**
+**Current Total: 206 tests passing, 3 skipped**
 
 ---
 
@@ -132,8 +132,8 @@ The following sources are described in ARCHITECTURE.md but are **not implemented
 
 - [x] Rigid body state — `src/physics/rigid-body.ts`
 - [x] Rigid body tests — `tests/physics/rigid-body.test.ts`
-- [ ] Force calculations — `src/physics/forces.ts`
-- [ ] Force calculation tests — `tests/physics/forces.test.ts`
+- [x] Force calculations — `src/physics/forces.ts`
+- [x] Force calculation tests — `tests/physics/forces.test.ts` (34 tests)
 - [ ] RK4 integrator — `src/physics/integrator.ts`
 - [ ] Integrator tests — `tests/physics/integrator.test.ts`
 - [ ] Collision detection — `src/physics/collision.ts`

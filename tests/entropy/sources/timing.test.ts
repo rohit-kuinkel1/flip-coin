@@ -1,8 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  collectTimingEntropy,
-  type TimingEntropyResult,
-} from '../../../src/entropy/sources/timing';
+import { describe, it, expect } from 'vitest';
+import { collectTimingEntropy } from '../../../src/entropy/sources/timing';
 
 describe('Timing Entropy Source', () => {
   /**

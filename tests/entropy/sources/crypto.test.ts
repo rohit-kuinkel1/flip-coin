@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  collectCryptoEntropy,
-  isCryptoEntropyAvailable,
-} from '../../../src/entropy/sources/crypto';
+import { collectCryptoEntropy, isCryptoEntropyAvailable } from '../../../src/entropy/sources/crypto';
 
 describe('Crypto Entropy Source', () => {
   describe('isCryptoEntropyAvailable', () => {
@@ -38,6 +35,9 @@ describe('Crypto Entropy Source', () => {
     it('should return boolean type', () => {
       /**
        * Regardless of availability, the function must return a boolean.
+       * We verify by checking the type of the result and expect it to
+       * be boolean since we expect our internal implementation to
+       * return a boolean.
        */
       const result = isCryptoEntropyAvailable();
       expect(typeof result).toBe('boolean');
