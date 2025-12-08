@@ -36,7 +36,7 @@ export function generateInitialCondition(
     const reader = new EntropyReader(entropy);
 
     /**
-     * 1. Calculate Linear Velocity (Vertical Impulse)
+     * Calculate Linear Velocity (Vertical Impulse)
      * We assume the launch is primarily vertical (Y-axis).
      * Future work could add horizontal drift parameters.
      */
@@ -47,7 +47,7 @@ export function generateInitialCondition(
     const linearVelocity = new Vec3(0, impulseMag, 0);
 
     /**
-     * 2. Calculate Angular Velocity (Spin)
+     * Calculate Angular Velocity (Spin)
      */
     const spinMag = reader.nextGaussian(
         params.angularVelocityMean,
@@ -55,7 +55,7 @@ export function generateInitialCondition(
     );
 
     /**
-     * 3. Calculate Spin Axis (with wobble)
+     * Calculate Spin Axis (with wobble)
      * We perturb the ideal axis by adding a small random vector.
      * axis_final = normalize(axis_ideal + random * wobble)
      */
@@ -153,7 +153,6 @@ class EntropyReader {
          * We check for u1 close to 0 to avoid log(0)
          */
         const safeU1 = u1 < 1e-10 ? 1e-10 : u1;
-
         const z0 = Math.sqrt(-2.0 * Math.log(safeU1)) * Math.cos(2.0 * Math.PI * u2);
 
         return mean + z0 * stdDev;

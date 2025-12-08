@@ -76,17 +76,18 @@ export const DEFAULT_LAUNCH_PARAMETERS: LaunchParameters = {
     /**
      * Identity
      */
-    initialOrientation: new Quaternion(0, 0, 0, 1),
+    initialOrientation: new Quaternion(1, 0, 0, 0),
     /**
      * Sufficient for ~1.2m height with standard mass
      */
     impulseMean: 5.0,
     impulseStdDev: 0.5,
     /**
-     * ~5 rotations per second
+     * ~19-20 rotations per second (rapid spin)
+     * Previous value (30) was ~4-5 rotations/sec which looked too slow/heavy.
      */
-    angularVelocityMean: 30.0,
-    angularVelocityStdDev: 5.0,
+    angularVelocityMean: 120.0,
+    angularVelocityStdDev: 20.0,
     spinAxis: new Vec3(1, 0, 0),
     /**
      * Slight wobble

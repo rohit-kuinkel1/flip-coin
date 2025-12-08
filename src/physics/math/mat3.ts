@@ -80,6 +80,18 @@ export class Mat3 {
   public static readonly TOLERANCE = 1e-6;
 
   /**
+   * Threshold for determining if a matrix is singular (non-invertible).
+   * 
+   * We use a much smaller value than TOLERANCE because physically valid matrices
+   * (like inertia tensors of small objects) can have very small determinants
+   * (e.g., 10^-20) which are mathematically invertible but would be rejected
+   * by a loose tolerance.
+   * 
+   * Value is 1e-32, comfortably above the smallest normalized double (2.22e-308).
+   */
+  public static readonly SINGULARITY_THRESHOLD = 1e-32;
+
+  /**
    * The identity matrix: multiplying by this leaves vectors unchanged.
    *
    *     | 1  0  0 |
@@ -243,17 +255,17 @@ export class Mat3 {
     const b = matrix;
 
     return new Mat3(
-      a.m00*b.m00 + a.m01*b.m10 + a.m02*b.m20,
-      a.m00*b.m01 + a.m01*b.m11 + a.m02*b.m21,
-      a.m00*b.m02 + a.m01*b.m12 + a.m02*b.m22,
+      a.m00 * b.m00 + a.m01 * b.m10 + a.m02 * b.m20,
+      a.m00 * b.m01 + a.m01 * b.m11 + a.m02 * b.m21,
+      a.m00 * b.m02 + a.m01 * b.m12 + a.m02 * b.m22,
 
-      a.m10*b.m00 + a.m11*b.m10 + a.m12*b.m20,
-      a.m10*b.m01 + a.m11*b.m11 + a.m12*b.m21,
-      a.m10*b.m02 + a.m11*b.m12 + a.m12*b.m22,
+      a.m10 * b.m00 + a.m11 * b.m10 + a.m12 * b.m20,
+      a.m10 * b.m01 + a.m11 * b.m11 + a.m12 * b.m21,
+      a.m10 * b.m02 + a.m11 * b.m12 + a.m12 * b.m22,
 
-      a.m20*b.m00 + a.m21*b.m10 + a.m22*b.m20,
-      a.m20*b.m01 + a.m21*b.m11 + a.m22*b.m21,
-      a.m20*b.m02 + a.m21*b.m12 + a.m22*b.m22
+      a.m20 * b.m00 + a.m21 * b.m10 + a.m22 * b.m20,
+      a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21,
+      a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22
     );
   }
 
@@ -398,7 +410,7 @@ export class Mat3 {
   public inverse(): Mat3 | null {
     const det = this.determinant();
 
-    if (Math.abs(det) < Mat3.TOLERANCE) {
+    if (Math.abs(det) < Mat3.SINGULARITY_THRESHOLD) {
       return null;
     }
 

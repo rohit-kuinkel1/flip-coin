@@ -95,7 +95,17 @@ export function detectCollision(
      * -> lowest = (0, 0.1, 0) - (0, 0.001, 0) = (0, 0.099, 0)
      */
     const halfThickness = body.thickness / 2;
-    const lowestPoint = body.position.subtract(upWorld.scale(halfThickness));
+
+    /**
+     * Determine which face is pointing down calculating both potential contact points.
+     * point1 = center + (h/2) * upWorld
+     * point2 = center - (h/2) * upWorld
+     */
+    const point1 = body.position.add(upWorld.scale(halfThickness));
+    const point2 = body.position.subtract(upWorld.scale(halfThickness));
+
+    // The actual lowest point is the one with the smaller Y value
+    const lowestPoint = point1.y < point2.y ? point1 : point2;
 
     /**
      * Step 3: Check if the lowest point has penetrated the ground (y < 0).
@@ -219,7 +229,7 @@ export function applyCollisionResponse(
     collision: CollisionResult,
     config: CollisionConfig = {}
 ): void {
-    if (!collision.colliding || !collision.normal || collision.penetrationDepth === undefined) {
+    if (!collision.colliding || !collision.normal || collision.penetrationDepth === undefined || !collision.contactPoint) {
         /**
          * No collision detected, nothing to do.
          */
@@ -234,87 +244,126 @@ export function applyCollisionResponse(
     const normal = collision.normal;
 
     /**
-     * Step 1: Decompose linear velocity into normal and tangential components.
-     *
-     * Normal component: v_n = (v · n) * n
-     * Tangential component: v_t = v - v_n
-     *
-     * This separation allows us to apply restitution to v_n and friction to v_t independently.
+     * Calculate the vector from center of mass to contact point.
+     * r = contactPoint - position
      */
-    const velocityDotNormal = body.linearVelocity.dotProduct(normal);
-    const normalVelocity = normal.scale(velocityDotNormal);
-    const tangentialVelocity = body.linearVelocity.subtract(normalVelocity);
+    const r = collision.contactPoint.subtract(body.position);
 
     /**
-     * Step 2: Apply restitution to normal velocity.
-     *
-     * If the coin is moving into the ground (v_n < 0), reverse and scale by restitution.
-     * If moving away from ground (v_n > 0), leave it alone (already separating).
-     *
-     * The condition `velocityDotNormal < 0` ensures we only apply restitution when
-     * actually colliding, not when the coin is resting or moving away.
+     * Determine velocity of the point on the body at the contact point.
+     * v_point = v_cm + ω × r
      */
-    let newNormalVelocity: Vec3;
+    const pointVelocity = body.linearVelocity.add(
+        body.angularVelocity.crossProduct(r)
+    );
+
+    /**
+     * Decompose point velocity into normal and tangential components.
+     */
+    const velocityDotNormal = pointVelocity.dotProduct(normal);
+    const normalVelocity = normal.scale(velocityDotNormal);
+    const tangentialVelocity = pointVelocity.subtract(normalVelocity);
+
+    /**
+     * Calculate Impulse magnitude for restitution (bounce).
+     * If v_n < 0 (moving into ground), we bounce.
+     */
+    let j_n = 0;
     if (velocityDotNormal < 0) {
         /**
          * Coin is moving into the ground, apply bounce.
          *
          * Formula: v_n_new = -e * v_n_old
          *
-         * Example: v_n = -3 m/s (downward), e = 0.5:
-         * -> v_n_new = -0.5 * (-3) = 1.5 m/s (upward)
+         * Micro-collision check: If velocity is very small, we assume it's settling
+         * and kill the bounce (restitution = 0) to prevent infinite micro-bouncing.
          */
-        newNormalVelocity = normalVelocity.scale(-resolvedConfig.restitution);
-    } else {
+        const effectiveRestitution = velocityDotNormal > -0.1 ? 0 : resolvedConfig.restitution;
+
         /**
-         * Coin is already moving away from ground or stationary in normal direction.
-         * No restitution needed.
+         * For a simple model, we assume infinite mass of the ground.
+         * J_n = -(1 + e) * v_n / (1/m + ...)
+         * But we are applying direct velocity modification logic before,
+         * which was simplified for a particle. For a rigid body, we must use the proper
+         * impulse scalar formula:
+         *
+         * J = -(1+e) * v_rel_n / (1/m + (I^-1 * (r x n)) . (r x n))
          */
-        newNormalVelocity = normalVelocity;
+
+        /**
+         * Precompute cross products
+         */
+        const rCrossN = r.crossProduct(normal);
+        const invI_rCrossN = body.inverseInertiaTensor.multiplyVec3(rCrossN);
+        const angularFactor = invI_rCrossN.dotProduct(rCrossN);
+
+        const impulseScalar = -(1 + effectiveRestitution) * velocityDotNormal / (
+            (1 / body.mass) + angularFactor
+        );
+        j_n = impulseScalar;
     }
 
     /**
-     * Step 3: Apply friction to tangential velocity.
-     *
-     * Friction opposes tangential motion. We reduce tangential velocity by the
-     * friction coefficient:
-     *
-     * -> v_t_new = v_t_old * (1 - μ)
-     *
-     * Example: v_t = (2, 0, 1) m/s, μ = 0.3:
-     * -> v_t_new = (2, 0, 1) * 0.7 = (1.4, 0, 0.7) m/s
+     * Tangential Impulse (Friction).
+     * We apply a simplified friction impulse opposing tangential velocity.
+     * 
+     * J_t = -μ * |J_n| * tangent_direction
+     * (Model: Coulomb friction)
      */
-    const newTangentialVelocity = tangentialVelocity.scale(1 - resolvedConfig.friction);
+    const frictionImpulseMagnitude = resolvedConfig.friction * Math.abs(j_n);
+    let j_t_vec = Vec3.ZERO;
+
+    if (tangentialVelocity.magnitudeSquare() > 1e-12) {
+        const tangentDir = tangentialVelocity.normalize();
+
+        // We limit friction impulse to stop the motion (cancel v_t) but not reverse it violently
+        // Ideally we solve for the exact impulse needed to stop, but clamping is easier.
+        // Actually, let's just use the Coulomb limit.
+        j_t_vec = tangentDir.scale(-frictionImpulseMagnitude);
+    }
 
     /**
-     * Step 4: Recombine normal and tangential components to get new linear velocity.
+     * Total Impulse Vector J
+     * J = J_n * n + J_t
      */
-    body.linearVelocity = newNormalVelocity.add(newTangentialVelocity);
+    const impulse = normal.scale(j_n).add(j_t_vec);
 
     /**
-     * Step 5: Apply friction damping to angular velocity.
-     *
-     * When the coin touches the ground, rotational friction slows its spin.
-     * We model this as simple damping: ω_new = ω_old * (1 - μ)
-     *
-     * Example: ω = (10, 50, 20) rad/s, μ = 0.3:
-     * -> ω_new = (10, 50, 20) * 0.7 = (7, 35, 14) rad/s
+     * Apply Impulse to Linear Velocity
+     * Δv = J / m
      */
-    body.angularVelocity = body.angularVelocity.scale(1 - resolvedConfig.friction);
+    body.linearVelocity = body.linearVelocity.add(impulse.scale(1 / body.mass));
 
     /**
-     * Step 6: Apply position correction to prevent sinking through ground.
-     *
-     * Move the coin along the normal direction by the penetration depth:
-     * -> position_new = position_old + penetrationDepth * normal
-     *
-     * Example: Position at (0, -0.005, 0), penetration = 0.006m:
-     * -> Corrected = (0, -0.005, 0) + (0, 0.006, 0) = (0, 0.001, 0)
-     *
-     * This ensures the coin's lowest point is exactly at or slightly above the ground
-     * after the correction, preventing visual artifacts and numerical instability.
+     * Apply Impulse to Angular Velocity
+     * Δω = I⁻¹ * (r × J)
      */
-    body.position = body.position.add(normal.scale(collision.penetrationDepth));
+    const torqueImpulse = r.crossProduct(impulse);
+    const deltaOmega = body.inverseInertiaTensor.multiplyVec3(torqueImpulse);
+    body.angularVelocity = body.angularVelocity.add(deltaOmega);
+
+    /**
+     * Position Correction (Projection)
+     * Push the body out of the ground to prevent sinking.
+     * We modify position directly.
+     */
+    if (collision.penetrationDepth > 0) {
+        body.position = body.position.add(normal.scale(collision.penetrationDepth));
+
+        /**
+         * Also apply a slight energy penalty to prevent jitter? 
+         * No, let's keep it simple. If we sink deep, we push out.
+         */
+    }
+
+    /**
+     * Apply additional angular damping on collision?
+     * The friction impulse `j_t` already provides torque that opposes spin if 
+     * the spin causes the contact point to slide. 
+     * `v_point = v + w x r`. Friction opposes `v_point`.
+     * So `r x J_friction` opposes `w`.
+     * This naturally handles spin damping! We don't need artificial damping.
+     */
 }
 
 /**

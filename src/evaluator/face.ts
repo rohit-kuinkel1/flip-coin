@@ -55,28 +55,24 @@ export function determineFace(
     const threshold = options.edgeThreshold ?? DEFAULT_EDGE_THRESHOLD;
 
     /**
-     * Step 1: Get the coin's normal vector in world space.
+     * Get the coin's normal vector in world space.
      * The local up vector is (0, 1, 0).
      */
     const localUp = Vec3.UP;
     const worldNormal = body.orientation.rotateVector(localUp);
 
     /**
-     * Step 2: Calculate alignment with world up (Y-axis).
+     * Calculate alignment with world up (Y-axis).
      * The dot product with (0, 1, 0) is simply the Y component.
+     * Then based on the alignment, we determine the face of the
+     * result.
      */
     const alignment = worldNormal.y;
-
-    /**
-     * Step 3: Determine face based on alignment.
-     */
     if (Math.abs(alignment) <= threshold) {
         return 'EDGE';
     }
 
-    if (alignment > 0) {
-        return 'HEADS';
-    }
-
-    return 'TAILS';
+    return alignment > 0
+        ? 'HEADS'
+        : 'TAILS';
 }

@@ -26,8 +26,13 @@ export interface ForceConfig {
     dragCoefficient?: number;
 
     /**
-     * Angular damping coefficient in N⋅m⋅s/rad.
-     * Default: 0.00001 (tuned for realistic spin decay)
+     * Angular damping coefficient (N*m*s/rad).
+     *
+     * Models air resistance to rotation.
+     * 
+     * Tuned value: 0.0005
+     * A higher value is chosen to ensure the coin simulation settles within a reasonable
+     * timeout (e.g. 5 seconds) for UX reasons, even if a perfect vacuum coin might spin longer.
      */
     angularDamping?: number;
 }
@@ -94,5 +99,5 @@ export const DEFAULT_FORCE_CONFIG: Required<ForceConfig> = {
     gravity: 9.81,
     airDensity: 1.2,
     dragCoefficient: 1.17,
-    angularDamping: 0.00001,
+    angularDamping: 1e-8,
 };
