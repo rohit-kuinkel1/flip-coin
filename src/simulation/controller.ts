@@ -49,9 +49,30 @@ export async function flipCoin(options: FlipOptions = {}): Promise<FlipResult> {
      * Thickness: 1.75mm
      */
     const coinConfig: Required<CoinConfig> = {
-        mass: 0.00567, //5.67g
-        radius: 0.01213, //12.13mm
-        thickness: 0.00175, //1.75mm
+        /**
+         * Mass conversion:
+         * -> 5.67 g = 5.67 / 1000 = 0.00567 kg
+         *
+         * We store mass in kilograms because all force equations
+         * (F = m * a) assume SI units.
+         */
+        mass: 0.00567,
+        /**
+         * Radius conversion:
+         * -> 12.13 mm = 12.13 / 1000 = 0.01213 m
+         *
+         * The radius feeds into the cylinder inertia tensor:
+         * -> I_yy = 0.5 * m * r^2
+         */
+        radius: 0.01213,
+        /**
+         * Thickness conversion:
+         * -> 1.75 mm = 1.75 / 1000 = 0.00175 m
+         *
+         * Thickness affects the inertia term:
+         * -> I_xx = I_zz = (1/12) * m * (3r^2 + h^2)
+         */
+        thickness: 0.00175,
         ...userCoinConfig,
     };
 

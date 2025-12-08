@@ -585,6 +585,20 @@ describe('Mat3', () => {
   });
 
   describe('Inverse', () => {
+    it('should compute inverse of very small but non-singular matrix', () => {
+      /**
+       * Physically valid matrices (like inertia tensors of small objects)
+       * can have very small determinants (e.g. 10^-25).
+       * These should be invertible with the appropriate singularity threshold.
+       */
+      const val = 1e-8;
+      const m = Mat3.diagonal(val, val, val);
+      // det = 1e-24. old TOLERANCE was 1e-6.
+
+      const inv = m.inverse();
+      expect(inv).not.toBeNull();
+      expect(inv!.get(0, 0)).toBeCloseTo(1e8, 1);
+    });
     it('should compute inverse of identity as identity', () => {
       /**
        * The identity matrix is its own inverse:
@@ -657,7 +671,7 @@ describe('Mat3', () => {
       const inv = m.inverse();
 
       expect(inv).not.toBeNull();
-      
+
       const product = m.multiply(inv!);
       expect(product.equalsApprox(Mat3.IDENTITY)).toBe(true);
     });
@@ -675,7 +689,7 @@ describe('Mat3', () => {
       const inv = m.inverse();
 
       expect(inv).not.toBeNull();
-      
+
       const product = inv!.multiply(m);
       expect(product.equalsApprox(Mat3.IDENTITY)).toBe(true);
     });

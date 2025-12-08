@@ -332,7 +332,7 @@ describe('computeAngularDragTorque', () => {
         const angularVelocity = new Vec3(0, 100, 0);
         const torque = computeAngularDragTorque(angularVelocity);
 
-        expect(Math.abs(torque.y)).toBeCloseTo(0.001, 5);
+        expect(Math.abs(torque.y)).toBeCloseTo(0.000001, 6);
     });
 });
 

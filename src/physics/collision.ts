@@ -104,7 +104,18 @@ export function detectCollision(
     const point1 = body.position.add(upWorld.scale(halfThickness));
     const point2 = body.position.subtract(upWorld.scale(halfThickness));
 
-    // The actual lowest point is the one with the smaller Y value
+    /**
+     * Choose the rim point that is physically lowest.
+     *
+     * point1 and point2 represent the two faces of the coin along its local
+     * "up" axis. Only the face with the smaller y-coordinate can touch the
+     * ground first. Selecting the minimum y ensures we do not falsely report
+     * a collision from the upward-facing face.
+     *
+     * Example:
+     * -> point1.y = 0.05, point2.y = 0.047
+     * -> lowestPoint = point2 because 0.047 < 0.05
+     */
     const lowestPoint = point1.y < point2.y ? point1 : point2;
 
     /**
@@ -316,9 +327,24 @@ export function applyCollisionResponse(
     if (tangentialVelocity.magnitudeSquare() > 1e-12) {
         const tangentDir = tangentialVelocity.normalize();
 
-        // We limit friction impulse to stop the motion (cancel v_t) but not reverse it violently
-        // Ideally we solve for the exact impulse needed to stop, but clamping is easier.
-        // Actually, let's just use the Coulomb limit.
+        /**
+         * Friction impulse is clamped to Coulomb's limit so it counters sliding
+         * without injecting energy or reversing motion.
+         *
+         * Coulomb model: |J_t| <= μ * |J_n|
+         * -> We choose J_t = -t̂ * μ * |J_n|
+         *
+         * Rationale:
+         * - If we perfectly cancel tangential velocity when |v_t| is small,
+         *   we stop sliding without creating stick-slip oscillations.
+         * - If |v_t| is large, limiting |J_t| prevents an unrealistic reversal
+         *   where friction would make the coin accelerate in the opposite direction.
+         *
+         * Example with μ = 0.3 and |J_n| = 2 N·s:
+         * -> |J_t| = 0.3 * 2 = 0.6 N·s
+         * -> If tangential speed would require 1.0 N·s to fully stop, we only
+         *    apply 0.6 N·s, reducing but not flipping the direction.
+         */
         j_t_vec = tangentDir.scale(-frictionImpulseMagnitude);
     }
 

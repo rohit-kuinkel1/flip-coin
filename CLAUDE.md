@@ -6,6 +6,7 @@ This file documents coding conventions and preferences for this project. Claude 
 
 ## Comments Policy
 
+**ALWAYS USE BLOCK COMMENTS, NO COMMENTS SHOULD EVER START WITH A SLASH**
 **No single-line comments.** Every comment must be a block comment that explains:
 
 1. **WHAT** — What does this code do?

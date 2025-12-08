@@ -21,8 +21,21 @@ import type { DebugFlipResult } from './types/debug-flip-result';
 export type { DebugFlipOptions };
 export type { DebugFlipResult };
 
-
-//re-export for consumers (e.g. visualization)
+/**
+ * Re-export low-level math and state helpers so that external tooling
+ * (for example, a Three.js visualization or a deterministic replay UI)
+ * can consume the same immutable primitives used by the simulation.
+ *
+ * The visualization layer needs to read positions, orientations, and inertia
+ * tensors to draw the trajectory. By exposing these here instead of duplicating
+ * implementations, we guarantee identical numerical behavior between the
+ * simulator and any debug overlays.
+ *
+ * Example:
+ * -> A debugger can read a `RigidBodyState` frame, feed its `Quaternion` and
+ *    `Vec3` values into a renderer, and be confident the numbers match the
+ *    physics step because they share the same class definitions.
+ */
 export { Mat3, Vec3, Quaternion };
 export type { RigidBodyState };
 
@@ -148,7 +161,26 @@ export async function debugFlipCoin(options: DebugFlipOptions = {}): Promise<Deb
             trajectory.push(captureState(body));
         }
 
-        // GROUND DAMPING
+        /**
+         * Ground damping: bleed energy when the coin is close to the surface.
+         *
+         * We treat "near ground" as y < radius, which corresponds to the coin's
+         * center being at or below the point where a perfectly flat coin would
+         * contact the plane. When this triggers, we apply a simple exponential
+         * decay to both linear and angular velocity:
+         *
+         * -> v_new = v_old * 0.8
+         * -> ω_new = ω_old * 0.8
+         *
+         * Example:
+         * -> linear speed = 1.0 m/s near ground
+         * -> after damping: 1.0 * 0.8 = 0.8 m/s
+         * -> after two frames: 0.8 * 0.8 = 0.64 m/s
+         *
+         * This artificial damping compensates for the coarse collision model
+         * and floating-point accumulation errors that could otherwise leave
+         * the coin jittering on the surface indefinitely.
+         */
         if (body.position.y < coinConfig.radius) {
             body.angularVelocity = body.angularVelocity.scale(0.8);
             body.linearVelocity = body.linearVelocity.scale(0.8);

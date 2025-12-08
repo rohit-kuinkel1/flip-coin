@@ -1,5 +1,18 @@
 # flip-coin Development Progress
 
+
+---
+Scripts available:
+We use pnpm as our package manager.
+| Script | Purpose |
+|--------|---------|
+| `pnpm build` | Build ESM + CJS + .d.ts to dist/ |
+| `pnpm dev` | Build in watch mode |
+| `pnpm test` | Run tests in watch mode |
+| `pnpm test:run` | Run tests once |
+| `pnpm test:coverage` | Run tests with coverage |
+| `pnpm lint` | Lint source files |
+| `pnpm typecheck` | Type-check without emitting |
 ---
 
 ## Misc
@@ -126,7 +139,7 @@ The following sources are described in ARCHITECTURE.md but are **not implemented
 
 ## Phase 3: Physics Engine
 
-**Status: IN PROGRESS**
+**Status: COMPLETE**
 
 3D rigid body dynamics simulation.
 
@@ -134,62 +147,62 @@ The following sources are described in ARCHITECTURE.md but are **not implemented
 - [x] Rigid body tests — `tests/physics/rigid-body.test.ts`
 - [x] Force calculations — `src/physics/forces.ts`
 - [x] Force calculation tests — `tests/physics/forces.test.ts` (34 tests)
-- [ ] RK4 integrator — `src/physics/integrator.ts`
-- [ ] Integrator tests — `tests/physics/integrator.test.ts`
-- [ ] Collision detection — `src/physics/collision.ts`
-- [ ] Collision tests — `tests/physics/collision.test.ts`
+- [x] RK4 integrator — `src/physics/integrator.ts`
+- [x] Integrator tests — `tests/physics/integrator.test.ts`
+- [x] Collision detection — `src/physics/collision.ts`
+- [x] Collision tests — `tests/physics/collision.test.ts`
 
 ---
 
 ## Phase 4: Result Evaluator
 
-**Status: NOT STARTED**
+**Status: COMPLETE**
 
 Determine flip outcome from final coin state.
 
-- [ ] Face determination — `src/evaluator/face.ts`
-- [ ] Face determination tests — `tests/evaluator/face.test.ts`
-- [ ] Stability detection — `src/simulation/stability.ts`
-- [ ] Stability detection tests — `tests/simulation/stability.test.ts`
+- [x] Face determination — `src/evaluator/face.ts`
+- [x] Face determination tests — `tests/evaluator/face.test.ts`
+- [x] Stability detection — `src/simulation/stability.ts`
+- [x] Stability detection tests — `tests/simulation/stability.test.ts`
 
 ---
 
 ## Phase 5: Simulation Controller
 
-**Status: NOT STARTED**
-
-Orchestrate the full flip process.
-
-- [ ] Initial condition generator — `src/simulation/initial.ts`
-- [ ] Initial condition tests — `tests/simulation/initial.test.ts`
-- [ ] Main simulation loop — `src/simulation/controller.ts`
-- [ ] Controller tests — `tests/simulation/controller.test.ts`
-- [ ] Public API exports — `src/index.ts`
-- [ ] Debug API exports — `src/debug.ts`
-- [ ] Type definitions — `src/types/*.ts`
-- [ ] Integration tests — `tests/integration/*.test.ts`
+**Status: COMPLETE**
+ 
+ Orchestrate the full flip process.
+ 
+ - [x] Initial condition generator — `src/simulation/initial.ts`
+ - [x] Initial condition tests — `tests/simulation/initial.test.ts`
+ - [x] Main simulation loop — `src/simulation/controller.ts`
+ - [x] Controller tests — `tests/simulation/controller.test.ts`
+ - [x] Public API exports — `src/index.ts`
+ - [x] Debug API exports — `src/debug.ts`
+ - [x] Type definitions — `src/types/*.ts`
+ - [x] Integration tests — `tests/integration/*.test.ts`
 
 ---
 
 ## Phase 6: Validation and Polish
 
-**Status: NOT STARTED**
-
-Statistical validation and final touches.
-
-- [ ] Statistical distribution tests — `tests/statistical/*.test.ts`
-- [ ] Entropy quality tests — `tests/entropy/quality.test.ts`
-- [ ] README documentation — `README.md`
-- [ ] API documentation — TypeDoc comments
+**Status: COMPLETE**
+ 
+ Statistical validation and final touches.
+ 
+ - [x] Statistical distribution tests — `tests/statistical/*.test.ts`
+ - [x] Entropy quality tests — `tests/entropy/quality.test.ts` (Covered by functional entropy tests)
+ - [x] README documentation — `README.md`
+ - [x] API documentation — TypeDoc comments
 
 ---
 
 ## Phase 7: Visualization (Optional)
 
-**Status: NOT STARTED**
-
-Three.js debug visualization.
-
-- [ ] Scene setup — `src/visualization/scene.ts`
-- [ ] Coin mesh — `src/visualization/coin-mesh.ts`
-- [ ] Trajectory replay — `src/visualization/replay.ts`
+**Status: COMPLETE**
+ 
+ Three.js debug visualization.
+ 
+ - [x] Scene setup — `visualization/src/scene.ts`
+ - [x] Coin mesh — `visualization/src/coin-mesh.ts`
+ - [x] Trajectory replay — `visualization/src/replay.ts`

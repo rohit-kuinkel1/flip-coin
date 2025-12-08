@@ -346,12 +346,12 @@ flip-coin/
 │   │   ├── controller.ts     # Main simulation loop
 │   │   ├── initial.ts        # Initial condition generator
 │   │   └── stability.ts      # Rest detection
-│   ├── evaluator/
-│   │   ├── errors/           # Evaluator-specific error classes
-│   │   └── face.ts           # Determine heads/tails/edge
-│   └── visualization/        # Optional Three.js debugger
-│       ├── scene.ts
-│       └── coin-mesh.ts
+│   └── evaluator/
+│       ├── errors/           # Evaluator-specific error classes
+│       └── face.ts           # Determine heads/tails/edge
+├── visualization/            # Optional Three.js debugger
+│   ├── scene.ts
+│   └── coin-mesh.ts
 ├── tests/
 ├── package.json
 ├── tsconfig.json

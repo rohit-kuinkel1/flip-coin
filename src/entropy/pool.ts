@@ -129,8 +129,9 @@ const ENTROPY_LEVEL_CONFIGS: Record<EntropyLevel, EntropyLevelConfig> = {
  * Example usage:
  * ```typescript
  * const entropy = await collectEntropy({ level: 'standard', outputBytes: 64 });
- * // entropy.bytes contains 64 random bytes
- * // entropy.stats shows collection details
+ * const byteCount = entropy.bytes.length;          /* 64 random bytes */
+ * const sources = entropy.stats.sourcesUsed.join(', '); /* e.g., "crypto, timing" */
+ * const collectionMs = entropy.stats.collectionTimeMs;  /* wall-clock duration */
  * ```
  *
  * @param options Collection options
@@ -175,9 +176,18 @@ export async function collectEntropy(
        * Log a warning but don't fail - graceful degradation.
        */
       if (totalBits < config.targetBits) {
-        // In a production environment, we'd log this warning.
-        // For now, we proceed with reduced entropy - this is intentional
-        // per the "minimum viable timer jitter" requirement.
+        /**
+         * Graceful degradation rationale:
+         * - Liveness beats perfection: returning slightly less entropy is better
+         *   than blocking the caller indefinitely.
+         * - Minimum viable entropy is guaranteed by the timer source, so the
+         *   result is still unpredictable even if the target was missed.
+         *
+         * Example: Target = 128 bits, collected = 96 bits when maxTimeMs hit.
+         * -> We still mix and expand the 96 bits because the flip must proceed.
+         * -> In production we would emit a warning metric/log to surface the
+         *    entropy shortfall for operational visibility.
+         */
       }
       break;
     }
