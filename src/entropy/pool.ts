@@ -129,9 +129,9 @@ const ENTROPY_LEVEL_CONFIGS: Record<EntropyLevel, EntropyLevelConfig> = {
  * Example usage:
  * ```typescript
  * const entropy = await collectEntropy({ level: 'standard', outputBytes: 64 });
- * const byteCount = entropy.bytes.length;          /* 64 random bytes */
- * const sources = entropy.stats.sourcesUsed.join(', '); /* e.g., "crypto, timing" */
- * const collectionMs = entropy.stats.collectionTimeMs;  /* wall-clock duration */
+ * const byteCount = entropy.bytes.length;          
+ * const sources = entropy.stats.sourcesUsed.join(', '); 
+ * const collectionMs = entropy.stats.collectionTimeMs; 
  * ```
  *
  * @param options Collection options
