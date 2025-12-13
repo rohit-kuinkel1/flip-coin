@@ -92,9 +92,10 @@ export interface ForceConfig {
  *
  * Consumers can spread this config and override individual values:
  * ```typescript
- * computeForces(body, { ...DEFAULT_FORCE_CONFIG, gravity: 1.62 }); /* gravity on moon */
+ * computeForces(body, { ...DEFAULT_FORCE_CONFIG, gravity: 1.62 }); 
  * ```
  */
+
 export const DEFAULT_FORCE_CONFIG: Required<ForceConfig> = {
     gravity: 9.81,
     airDensity: 1.2,

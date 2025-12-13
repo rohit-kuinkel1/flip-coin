@@ -10,6 +10,7 @@ import { Vec3 } from '../physics/math/vec3';
 import type { FlipOptions } from '../types/flip-options';
 import type { FlipResult } from '../types/flip-result';
 import type { CoinConfig } from '../types/coin-config';
+import { defaultCoinConfig } from '../types/coin-config';
 import type { TossProfile } from '../types/toss-profile';
 import type { LaunchParameters } from './types/launch-parameters';
 import { DEFAULT_LAUNCH_PARAMETERS } from './types/launch-parameters';
@@ -34,67 +35,56 @@ import { EdgeRetryExhaustedError } from './errors/edge-retry-exhausted-error';
  * @returns Promise resolving to the flip result.
  */
 export async function flipCoin(options: FlipOptions = {}): Promise<FlipResult> {
+    /**
+     * FlipOptions are the custom parameters that the user can provide to configure the flip.
+     * If the user has specified a value for a parameter then we need to use the provided
+     * value, else we just define a default value and move forward with that.
+     */
     const {
         entropyLevel = 'standard',
-        coin: userCoinConfig = {},
+        coinConfig: userCoinConfig = {},
         tossProfile = {},
         timeout = 10000,
         maxEdgeRetries = 5,
     } = options;
 
     /**
-     * Default Coin Configuration (approx. US Quarter)
-     * Mass: 5.67g
-     * Radius: 12.13mm
-     * Thickness: 1.75mm
+     * Note: we cant just assign defaultConfig to coinConfig up front for the 
+     * default values in options because it would technically work, but only if
+     * the user passed nothing, then coinConfig would correctly be set to the 
+     * defaultCoinConfig. But if the user passes partial values, like for instance
+     * for radius and thickness only but avoids mass, then our approach will just
+     * break the wanted behavior if we were to assign defaultCoinConfig in options
+     * itself without using spread operator here like this.
+     * 
+     * Also note that the order matters here.
      */
     const coinConfig: Required<CoinConfig> = {
-        /**
-         * Mass conversion:
-         * -> 5.67 g = 5.67 / 1000 = 0.00567 kg
-         *
-         * We store mass in kilograms because all force equations
-         * (F = m * a) assume SI units.
-         */
-        mass: 0.00567,
-        /**
-         * Radius conversion:
-         * -> 12.13 mm = 12.13 / 1000 = 0.01213 m
-         *
-         * The radius feeds into the cylinder inertia tensor:
-         * -> I_yy = 0.5 * m * r^2
-         */
-        radius: 0.01213,
-        /**
-         * Thickness conversion:
-         * -> 1.75 mm = 1.75 / 1000 = 0.00175 m
-         *
-         * Thickness affects the inertia term:
-         * -> I_xx = I_zz = (1/12) * m * (3r^2 + h^2)
-         */
-        thickness: 0.00175,
+        ...defaultCoinConfig,
         ...userCoinConfig,
     };
 
     /**
-     * Simulation Constants
+     * 10kHz fixed timestep.
+     * 10kHz because f = 1/T and 1/0.0001 results in 10kHz.
+     * 
+     * High frequency is needed for accurate rigid body physics.
      */
     const dt = 0.0001;
-    /**
-     * 10kHz fixed timestep.
-     * High frequency needed for accurate rigid body physics.
-     */
-    const maxConsecutiveStableFrames = 10;
+
     /**
      * Frames to hold stable before stopping.
      * Ensures we don't stop prematurely if the coin briefly pauses at an apex.
+     * Basically, only consider a stop as a stop if the coin actually didnt move
+     * for a number of frames which currently we have defined to be here under 
+     * maxConsecutiveStableFrames.
      */
+    const maxConsecutiveStableFrames = 10;
 
     let retries = 0;
-
     while (true) {
         /**
-         * ollect Entropy
+         * Collect Entropy
          * We collect fresh entropy for every attempt (including retries).
          */
         const entropyResult = await collectEntropy({ level: entropyLevel });

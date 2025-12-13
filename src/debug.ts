@@ -54,7 +54,7 @@ export type { RigidBodyState };
 export async function debugFlipCoin(options: DebugFlipOptions = {}): Promise<DebugFlipResult> {
     const {
         entropyLevel = 'standard',
-        coin: userCoinConfig = {},
+        coinConfig: userCoinConfig = {},
         tossProfile = {},
         /**
          * Can raise default timeout for debug sessions if analyzing slow-mo

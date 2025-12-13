@@ -18,7 +18,7 @@ export interface FlipOptions {
     /**
      * physical properties of the coin.
      */
-    coin?: CoinConfig;
+    coinConfig?: CoinConfig;
 
     /**
      * Characteristics of the toss (height, speed, spin).
