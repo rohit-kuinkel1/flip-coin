@@ -131,9 +131,6 @@ export async function flipCoin(options: FlipOptions = {}): Promise<FlipResult> {
             initialState.angularVelocity
         );
 
-        /**
-         * Run Physics Simulation Loop
-         */
         const startTime = performance.now();
         /**
          * TODO: Hook into collision callbacks to count this if needed.
@@ -186,9 +183,6 @@ export async function flipCoin(options: FlipOptions = {}): Promise<FlipResult> {
             }
 
             elapsedSimulationTime += dt * 1000;
-            /**
-             * Convert dt (sec) to ms estimation for timeout check.
-             */
 
             /**
              * Allow event loop to breathe
